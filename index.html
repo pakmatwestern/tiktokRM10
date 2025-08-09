@@ -706,9 +706,9 @@
             <div class="stat-card daily">
                 <div class="stat-header">
                     <div class="stat-info">
-                        <h3>Profit Harian</h3>
-                        <div class="stat-value" id="dailyProfit">RM0</div>
-                        <div class="stat-subtitle" id="dailyUnits">0 units</div>
+                        <h3>Daily Revenue</h3>
+                        <div class="stat-value" id="dailyRevenue">RM0</div>
+                        <div class="stat-subtitle" id="dailyProfit">Profit: RM0</div>
                     </div>
                     <div class="stat-icon">
                         <i class="fas fa-chart-line"></i>
@@ -719,9 +719,9 @@
             <div class="stat-card monthly">
                 <div class="stat-header">
                     <div class="stat-info">
-                        <h3>Profit Bulanan</h3>
-                        <div class="stat-value" id="monthlyProfit">RM0</div>
-                        <div class="stat-subtitle" id="monthlyUnits">0 units</div>
+                        <h3>Monthly Revenue</h3>
+                        <div class="stat-value" id="monthlyRevenue">RM0</div>
+                        <div class="stat-subtitle" id="monthlyProfit">Profit: RM0</div>
                     </div>
                     <div class="stat-icon">
                         <i class="fas fa-calendar-alt"></i>
@@ -732,9 +732,9 @@
             <div class="stat-card annual">
                 <div class="stat-header">
                     <div class="stat-info">
-                        <h3>Profit Tahunan</h3>
-                        <div class="stat-value" id="annualProfit">RM0</div>
-                        <div class="stat-subtitle" id="annualUnits">0 units</div>
+                        <h3>Annual Revenue</h3>
+                        <div class="stat-value" id="annualRevenue">RM0</div>
+                        <div class="stat-subtitle" id="annualProfit">Profit: RM0</div>
                     </div>
                     <div class="stat-icon">
                         <i class="fas fa-trophy"></i>
@@ -1060,18 +1060,23 @@
             const monthlyProfit = dailyProfit * 30;
             const annualProfit = monthlyProfit * 12;
 
+            const dailyRevenue = calculations.revenue * calculations.dailyVolume;
+            const monthlyRevenue = dailyRevenue * 30;
+            const annualRevenue = monthlyRevenue * 12;
+
             const dailyUnits = calculations.dailyVolume * calculations.units;
             const monthlyUnits = dailyUnits * 30;
             const annualUnits = monthlyUnits * 12;
 
-            animateValue('dailyProfit', formatCurrency(dailyProfit));
-            document.getElementById('dailyUnits').textContent = `${formatNumber(dailyUnits)} units`;
+            // Update revenue and profit displays
+            animateValue('dailyRevenue', formatCurrency(dailyRevenue));
+            document.getElementById('dailyProfit').textContent = `Profit: ${formatCurrency(dailyProfit)}`;
 
-            animateValue('monthlyProfit', formatCurrency(monthlyProfit));
-            document.getElementById('monthlyUnits').textContent = `${formatNumber(monthlyUnits)} units`;
+            animateValue('monthlyRevenue', formatCurrency(monthlyRevenue));
+            document.getElementById('monthlyProfit').textContent = `Profit: ${formatCurrency(monthlyProfit)}`;
 
-            animateValue('annualProfit', formatCurrency(annualProfit));
-            document.getElementById('annualUnits').textContent = `${formatNumber(annualUnits)} units`;
+            animateValue('annualRevenue', formatCurrency(annualRevenue));
+            document.getElementById('annualProfit').textContent = `Profit: ${formatCurrency(annualProfit)}`;
 
             // Update product names in sections
             document.getElementById('selectedProductName').textContent = product.name;
@@ -1081,7 +1086,7 @@
             updateRevenueBreakdown(calculations);
             
             // Update volume projections
-            updateVolumeProjections(calculations, dailyProfit, monthlyProfit, annualProfit, annualUnits);
+            updateVolumeProjections(calculations, dailyProfit, monthlyProfit, annualProfit, annualUnits, dailyRevenue, monthlyRevenue, annualRevenue);
 
             // Update charts
             updateProfitChart();
@@ -1133,8 +1138,10 @@
         }
 
         // Update volume projections
-        function updateVolumeProjections(calculations, dailyProfit, monthlyProfit, annualProfit, annualUnits) {
+        function updateVolumeProjections(calculations, dailyProfit, monthlyProfit, annualProfit, annualUnits, dailyRevenue, monthlyRevenue, annualRevenue) {
             const volumeProjections = document.getElementById('volumeProjections');
+            
+            const weeklyRevenue = dailyRevenue * 7;
             
             volumeProjections.innerHTML = `
                 <div class="breakdown-item">
@@ -1142,20 +1149,36 @@
                     <span class="breakdown-value">${formatCurrency(dailyProfit)}</span>
                 </div>
                 <div class="breakdown-item">
+                    <span class="breakdown-label" style="color: var(--info-color);">Revenue Harian</span>
+                    <span class="breakdown-value" style="color: var(--info-color);">${formatCurrency(dailyRevenue)}</span>
+                </div>
+                <div class="breakdown-item">
                     <span class="breakdown-label">Mingguan (×7)</span>
                     <span class="breakdown-value">${formatCurrency(dailyProfit * 7)}</span>
+                </div>
+                <div class="breakdown-item">
+                    <span class="breakdown-label" style="color: var(--info-color);">Revenue Mingguan</span>
+                    <span class="breakdown-value" style="color: var(--info-color);">${formatCurrency(weeklyRevenue)}</span>
                 </div>
                 <div class="breakdown-item">
                     <span class="breakdown-label">Bulanan (×30)</span>
                     <span class="breakdown-value">${formatCurrency(monthlyProfit)}</span>
                 </div>
                 <div class="breakdown-item">
+                    <span class="breakdown-label" style="color: var(--info-color);">Revenue Bulanan</span>
+                    <span class="breakdown-value" style="color: var(--info-color);">${formatCurrency(monthlyRevenue)}</span>
+                </div>
+                <div class="breakdown-item">
                     <span class="breakdown-label">Tahunan (×365)</span>
                     <span class="breakdown-value">${formatCurrency(annualProfit)}</span>
                 </div>
                 <div class="breakdown-item">
-                    <span class="breakdown-label" style="color: var(--info-color);">Unit Terjual Setahun</span>
-                    <span class="breakdown-value" style="color: var(--info-color);">${formatNumber(annualUnits)}</span>
+                    <span class="breakdown-label" style="color: var(--info-color);">Revenue Tahunan</span>
+                    <span class="breakdown-value" style="color: var(--info-color);">${formatCurrency(annualRevenue)}</span>
+                </div>
+                <div class="breakdown-item">
+                    <span class="breakdown-label" style="color: #8b5cf6;">Unit Terjual Setahun</span>
+                    <span class="breakdown-value" style="color: #8b5cf6;">${formatNumber(annualUnits)}</span>
                 </div>
             `;
         }

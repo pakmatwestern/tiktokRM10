@@ -3,9 +3,26 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard Analisis Profit - Sos & Tepung</title>
+    <title>Dashboard Profit Analysis - Sos & Tepung</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
+        :root {
+            --primary-color: #667eea;
+            --secondary-color: #764ba2;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+            --info-color: #3b82f6;
+            --dark-color: #1f2937;
+            --light-gray: #f8fafc;
+            --border-color: #e2e8f0;
+            --text-primary: #1a202c;
+            --text-secondary: #718096;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+
         * {
             margin: 0;
             padding: 0;
@@ -13,307 +30,624 @@
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        .dashboard-container {
+            max-width: 1400px;
+            margin: 0 auto;
             padding: 20px;
         }
 
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
+        /* Header Section */
+        .header {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            margin-bottom: 30px;
+            box-shadow: var(--shadow-lg);
+            text-align: center;
+            position: relative;
+            overflow: hidden;
         }
 
-        .header {
-            text-align: center;
-            margin-bottom: 30px;
-            background: white;
-            padding: 30px;
-            border-radius: 15px;
-            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
         }
 
         .header h1 {
-            font-size: 2.5em;
-            color: #2d3748;
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--text-primary);
             margin-bottom: 10px;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
 
         .header p {
-            color: #718096;
-            font-size: 1.1em;
+            font-size: 1.1rem;
+            color: var(--text-secondary);
+            font-weight: 500;
         }
 
-        .controls {
+        /* Controls Section */
+        .controls-section {
             background: white;
-            padding: 25px;
-            border-radius: 15px;
+            border-radius: 20px;
+            padding: 30px;
             margin-bottom: 30px;
-            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+            box-shadow: var(--shadow-lg);
         }
 
-        .controls h2 {
-            margin-bottom: 20px;
-            color: #2d3748;
+        .controls-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid var(--light-gray);
         }
 
-        .control-grid {
+        .controls-header i {
+            font-size: 1.5rem;
+            color: var(--primary-color);
+            margin-right: 10px;
+        }
+
+        .controls-header h2 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .controls-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 25px;
         }
 
         .control-group {
-            display: flex;
-            flex-direction: column;
+            position: relative;
         }
 
         .control-group label {
+            display: block;
             font-weight: 600;
             margin-bottom: 8px;
-            color: #4a5568;
+            color: var(--text-primary);
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
         .control-group select,
         .control-group input {
-            padding: 12px;
-            border: 2px solid #e2e8f0;
-            border-radius: 8px;
-            font-size: 16px;
-            transition: border-color 0.3s;
+            width: 100%;
+            padding: 15px;
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            font-size: 1rem;
+            background: white;
+            transition: all 0.3s ease;
+            font-weight: 500;
         }
 
         .control-group select:focus,
         .control-group input:focus {
             outline: none;
-            border-color: #4299e1;
-            box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.1);
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            transform: translateY(-2px);
         }
 
-        .metrics-grid {
+        .control-group select:hover,
+        .control-group input:hover {
+            border-color: var(--primary-color);
+        }
+
+        /* Quick Stats Cards */
+        .quick-stats {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
             margin-bottom: 30px;
         }
 
-        .metric-card {
+        .stat-card {
             background: white;
+            border-radius: 20px;
             padding: 25px;
-            border-radius: 15px;
-            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            transition: transform 0.3s;
+            box-shadow: var(--shadow-lg);
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
         }
 
-        .metric-card:hover {
+        .stat-card:hover {
             transform: translateY(-5px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
         }
 
-        .metric-info h3 {
-            font-size: 0.9em;
-            color: #718096;
-            margin-bottom: 5px;
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--gradient);
+        }
+
+        .stat-card.profit::before { background: linear-gradient(90deg, #10b981, #34d399); }
+        .stat-card.daily::before { background: linear-gradient(90deg, #3b82f6, #60a5fa); }
+        .stat-card.monthly::before { background: linear-gradient(90deg, #8b5cf6, #a78bfa); }
+        .stat-card.annual::before { background: linear-gradient(90deg, #ef4444, #f87171); }
+
+        .stat-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 15px;
+        }
+
+        .stat-info h3 {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-secondary);
             text-transform: uppercase;
             letter-spacing: 0.5px;
+            margin-bottom: 8px;
         }
 
-        .metric-info .value {
-            font-size: 2.2em;
-            font-weight: bold;
+        .stat-value {
+            font-size: 2.2rem;
+            font-weight: 700;
             margin-bottom: 5px;
         }
 
-        .metric-info .subtitle {
-            font-size: 0.9em;
-            color: #a0aec0;
+        .stat-card.profit .stat-value { color: var(--success-color); }
+        .stat-card.daily .stat-value { color: var(--info-color); }
+        .stat-card.monthly .stat-value { color: #8b5cf6; }
+        .stat-card.annual .stat-value { color: var(--danger-color); }
+
+        .stat-subtitle {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            font-weight: 500;
         }
 
-        .metric-icon {
-            font-size: 3em;
+        .stat-icon {
+            font-size: 2.5rem;
             opacity: 0.7;
+            transition: all 0.3s ease;
         }
 
-        .green { color: #48bb78; }
-        .blue { color: #4299e1; }
-        .purple { color: #9f7aea; }
-        .red { color: #f56565; }
+        .stat-card:hover .stat-icon {
+            transform: scale(1.1);
+            opacity: 1;
+        }
 
-        .charts-grid {
+        .stat-card.profit .stat-icon { color: var(--success-color); }
+        .stat-card.daily .stat-icon { color: var(--info-color); }
+        .stat-card.monthly .stat-icon { color: #8b5cf6; }
+        .stat-card.annual .stat-icon { color: var(--danger-color); }
+
+        /* Charts Section */
+        .charts-section {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            grid-template-columns: 1fr 1fr;
             gap: 30px;
             margin-bottom: 30px;
         }
 
         .chart-card {
             background: white;
-            padding: 25px;
-            border-radius: 15px;
-            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: var(--shadow-lg);
+            transition: all 0.3s ease;
         }
 
-        .chart-card h3 {
-            margin-bottom: 20px;
-            color: #2d3748;
-            font-size: 1.3em;
+        .chart-card:hover {
+            transform: translateY(-3px);
         }
 
-        .breakdown-section {
-            background: white;
-            padding: 25px;
-            border-radius: 15px;
-            margin-bottom: 30px;
-            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+        .chart-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid var(--light-gray);
         }
 
-        .breakdown-grid {
+        .chart-header i {
+            font-size: 1.3rem;
+            color: var(--primary-color);
+            margin-right: 10px;
+        }
+
+        .chart-header h3 {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .chart-container {
+            position: relative;
+            height: 350px;
+        }
+
+        /* Analysis Section */
+        .analysis-section {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            grid-template-columns: 1fr 1fr;
             gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .analysis-card {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: var(--shadow-lg);
+        }
+
+        .analysis-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid var(--light-gray);
+        }
+
+        .analysis-header i {
+            font-size: 1.3rem;
+            color: var(--primary-color);
+            margin-right: 10px;
+        }
+
+        .analysis-header h3 {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--text-primary);
         }
 
         .breakdown-item {
             display: flex;
             justify-content: space-between;
-            padding: 8px 0;
-            border-bottom: 1px solid #e2e8f0;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border-color);
+            transition: all 0.2s ease;
+        }
+
+        .breakdown-item:hover {
+            background: var(--light-gray);
+            margin: 0 -15px;
+            padding: 12px 15px;
+            border-radius: 8px;
         }
 
         .breakdown-item:last-child {
             border-bottom: none;
-            font-weight: bold;
-            padding-top: 15px;
-            border-top: 2px solid #e2e8f0;
+            font-weight: 700;
+            padding-top: 20px;
+            margin-top: 10px;
+            border-top: 2px solid var(--border-color);
         }
 
+        .breakdown-label {
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+
+        .breakdown-value {
+            font-weight: 600;
+            font-size: 1.05rem;
+        }
+
+        /* Table Section */
         .table-section {
             background: white;
-            padding: 25px;
-            border-radius: 15px;
+            border-radius: 20px;
+            padding: 30px;
             margin-bottom: 30px;
-            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
-            overflow-x: auto;
+            box-shadow: var(--shadow-lg);
+            overflow: hidden;
+        }
+
+        .table-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid var(--light-gray);
+        }
+
+        .table-header i {
+            font-size: 1.3rem;
+            color: var(--primary-color);
+            margin-right: 10px;
+        }
+
+        .table-header h3 {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--text-primary);
         }
 
         .comparison-table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 20px;
-        }
-
-        .comparison-table th,
-        .comparison-table td {
-            padding: 12px;
-            text-align: left;
-            border-bottom: 1px solid #e2e8f0;
+            font-size: 0.95rem;
         }
 
         .comparison-table th {
-            background: #f7fafc;
+            background: linear-gradient(135deg, var(--light-gray), #e2e8f0);
+            padding: 15px 12px;
+            text-align: left;
             font-weight: 600;
-            color: #4a5568;
+            color: var(--text-primary);
+            text-transform: uppercase;
+            font-size: 0.8rem;
+            letter-spacing: 0.5px;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        .comparison-table td {
+            padding: 15px 12px;
+            border-bottom: 1px solid var(--border-color);
+            transition: all 0.2s ease;
         }
 
         .comparison-table tr:hover {
-            background: #f7fafc;
+            background: var(--light-gray);
         }
 
+        .comparison-table .product-cell {
+            display: flex;
+            align-items: center;
+            font-weight: 600;
+        }
+
+        .comparison-table .product-emoji {
+            font-size: 1.3rem;
+            margin-right: 10px;
+        }
+
+        .comparison-table .highlight-row {
+            background: linear-gradient(135deg, #ebf8ff, #f0f9ff);
+            border-left: 4px solid var(--primary-color);
+        }
+
+        /* Recommendations Section */
         .recommendations {
-            background: linear-gradient(135deg, #e6fffa 0%, #f0fff4 100%);
-            padding: 25px;
-            border-radius: 15px;
-            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+            background: linear-gradient(135deg, #f0fff4, #ecfdf5);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: var(--shadow-lg);
+            border: 1px solid #d1fae5;
         }
 
-        .recommendations h3 {
-            margin-bottom: 20px;
-            color: #2d3748;
+        .recommendations-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #d1fae5;
+        }
+
+        .recommendations-header i {
+            font-size: 1.3rem;
+            color: var(--success-color);
+            margin-right: 10px;
+        }
+
+        .recommendations-header h3 {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--text-primary);
         }
 
         .recommendations-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 20px;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+            margin-bottom: 25px;
         }
 
         .recommendation-box {
             background: white;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: var(--shadow);
+            border-left: 4px solid var(--border-color);
+        }
+
+        .recommendation-box.advantages {
+            border-left-color: var(--success-color);
+        }
+
+        .recommendation-box.considerations {
+            border-left-color: var(--warning-color);
         }
 
         .recommendation-box h4 {
-            margin-bottom: 10px;
-            color: #2d3748;
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+        }
+
+        .recommendation-box.advantages h4 {
+            color: var(--success-color);
+        }
+
+        .recommendation-box.considerations h4 {
+            color: var(--warning-color);
         }
 
         .recommendation-box ul {
             list-style: none;
-            color: #4a5568;
         }
 
         .recommendation-box li {
-            padding: 3px 0;
+            padding: 5px 0;
+            color: var(--text-secondary);
+            font-weight: 500;
+            position: relative;
+            padding-left: 15px;
         }
 
-        .target-box {
+        .recommendation-box li::before {
+            content: '•';
+            position: absolute;
+            left: 0;
+            font-weight: 700;
+            color: var(--primary-color);
+        }
+
+        .target-summary {
             background: white;
-            padding: 20px;
-            border-radius: 10px;
+            border-radius: 15px;
+            padding: 25px;
             text-align: center;
-            margin-top: 20px;
-            font-weight: bold;
-            color: #2d3748;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            box-shadow: var(--shadow);
+            border: 2px solid var(--success-color);
+        }
+
+        .target-summary .target-icon {
+            font-size: 2rem;
+            color: var(--success-color);
+            margin-bottom: 10px;
+        }
+
+        .target-summary .target-text {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1024px) {
+            .charts-section {
+                grid-template-columns: 1fr;
+            }
+            
+            .analysis-section {
+                grid-template-columns: 1fr;
+            }
+            
+            .recommendations-grid {
+                grid-template-columns: 1fr;
+            }
         }
 
         @media (max-width: 768px) {
+            .dashboard-container {
+                padding: 15px;
+            }
+            
+            .header {
+                padding: 25px;
+            }
+            
             .header h1 {
-                font-size: 2em;
+                font-size: 2rem;
             }
             
-            .control-grid {
+            .controls-grid {
                 grid-template-columns: 1fr;
             }
             
-            .metrics-grid {
+            .quick-stats {
                 grid-template-columns: 1fr;
             }
             
-            .charts-grid {
-                grid-template-columns: 1fr;
+            .stat-value {
+                font-size: 1.8rem;
+            }
+            
+            .controls-section,
+            .chart-card,
+            .analysis-card,
+            .table-section,
+            .recommendations {
+                padding: 20px;
             }
         }
 
-        .product-emoji {
-            font-size: 1.5em;
-            margin-right: 8px;
+        /* Loading Animation */
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
         }
 
-        .highlight {
-            background: linear-gradient(135deg, #4299e1, #9f7aea);
-            color: white;
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Smooth transitions */
+        * {
+            transition: all 0.2s ease;
+        }
+
+        /* Scrollbar styling */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--light-gray);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--primary-color);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--secondary-color);
         }
     </style>
 </head>
 <body>
-    <div class="container">
+    <div class="dashboard-container">
         <!-- Header -->
         <div class="header">
-            <h1>📊 Dashboard Profit Analysis - Produk Sos & Tepung</h1>
-            <p>Harga Jual Fixed RM10 | Customer Bayar Shipping</p>
+            <h1><i class="fas fa-chart-line"></i> Dashboard Profit Analysis</h1>
+            <p>Analisis profit untuk produk Sos & Tepung | Harga Jual Fixed RM10 | Customer Bayar Shipping</p>
         </div>
 
         <!-- Controls -->
-        <div class="controls">
-            <h2>⚙️ Pengaturan Analisis</h2>
-            <div class="control-grid">
+        <div class="controls-section">
+            <div class="controls-header">
+                <i class="fas fa-cog"></i>
+                <h2>Pengaturan Analisis</h2>
+            </div>
+            <div class="controls-grid">
                 <div class="control-group">
-                    <label>Produk</label>
+                    <label><i class="fas fa-box"></i> Pilih Produk</label>
                     <select id="productSelect">
                         <option value="sos-perapan">🥫 Sos Perapan</option>
                         <option value="sos-black-pepper">🖤 Sos Black Pepper</option>
@@ -324,22 +658,22 @@
                 </div>
 
                 <div class="control-group">
-                    <label>Kos Produk (RM)</label>
-                    <input type="number" id="productCost" step="0.1" value="3.5">
+                    <label><i class="fas fa-dollar-sign"></i> Kos Produk (RM)</label>
+                    <input type="number" id="productCost" step="0.1" value="3.5" min="0" max="10">
                 </div>
 
                 <div class="control-group">
-                    <label>Affiliate (%)</label>
+                    <label><i class="fas fa-percentage"></i> Kadar Affiliate</label>
                     <select id="affiliateRate">
-                        <option value="0">0% - No Affiliate</option>
+                        <option value="0">0% - Tiada Affiliate</option>
                         <option value="10">10% - Standard</option>
                         <option value="15" selected>15% - Premium</option>
-                        <option value="20">20% - High Rate</option>
+                        <option value="20">20% - Tinggi</option>
                     </select>
                 </div>
 
                 <div class="control-group">
-                    <label>Bundle Type</label>
+                    <label><i class="fas fa-boxes"></i> Jenis Bundle</label>
                     <select id="bundleType">
                         <option value="single" selected>Single Item</option>
                         <option value="pack3">3-Pack Bundle</option>
@@ -348,121 +682,164 @@
                 </div>
 
                 <div class="control-group">
-                    <label>Volume Harian</label>
-                    <input type="number" id="dailyVolume" value="50">
+                    <label><i class="fas fa-calendar-day"></i> Volume Harian</label>
+                    <input type="number" id="dailyVolume" value="50" min="1" max="10000">
                 </div>
             </div>
         </div>
 
-        <!-- Key Metrics -->
-        <div class="metrics-grid">
-            <div class="metric-card">
-                <div class="metric-info">
-                    <h3>Profit Per Unit</h3>
-                    <div class="value green" id="profitPerUnit">RM0.00</div>
-                    <div class="subtitle" id="marginPercent">Margin: 0%</div>
+        <!-- Quick Stats -->
+        <div class="quick-stats">
+            <div class="stat-card profit">
+                <div class="stat-header">
+                    <div class="stat-info">
+                        <h3>Profit Per Unit</h3>
+                        <div class="stat-value" id="profitPerUnit">RM0.00</div>
+                        <div class="stat-subtitle" id="marginPercent">Margin: 0%</div>
+                    </div>
+                    <div class="stat-icon">
+                        <i class="fas fa-coins"></i>
+                    </div>
                 </div>
-                <div class="metric-icon green">💰</div>
             </div>
 
-            <div class="metric-card">
-                <div class="metric-info">
-                    <h3>Daily Profit</h3>
-                    <div class="value blue" id="dailyProfit">RM0</div>
-                    <div class="subtitle" id="dailyUnits">0 units</div>
+            <div class="stat-card daily">
+                <div class="stat-header">
+                    <div class="stat-info">
+                        <h3>Profit Harian</h3>
+                        <div class="stat-value" id="dailyProfit">RM0</div>
+                        <div class="stat-subtitle" id="dailyUnits">0 units</div>
+                    </div>
+                    <div class="stat-icon">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
                 </div>
-                <div class="metric-icon blue">📈</div>
             </div>
 
-            <div class="metric-card">
-                <div class="metric-info">
-                    <h3>Monthly Profit</h3>
-                    <div class="value purple" id="monthlyProfit">RM0</div>
-                    <div class="subtitle" id="monthlyUnits">0 units</div>
+            <div class="stat-card monthly">
+                <div class="stat-header">
+                    <div class="stat-info">
+                        <h3>Profit Bulanan</h3>
+                        <div class="stat-value" id="monthlyProfit">RM0</div>
+                        <div class="stat-subtitle" id="monthlyUnits">0 units</div>
+                    </div>
+                    <div class="stat-icon">
+                        <i class="fas fa-calendar-alt"></i>
+                    </div>
                 </div>
-                <div class="metric-icon purple">🎯</div>
             </div>
 
-            <div class="metric-card">
-                <div class="metric-info">
-                    <h3>Annual Profit</h3>
-                    <div class="value red" id="annualProfit">RM0</div>
-                    <div class="subtitle" id="annualUnits">0 units</div>
+            <div class="stat-card annual">
+                <div class="stat-header">
+                    <div class="stat-info">
+                        <h3>Profit Tahunan</h3>
+                        <div class="stat-value" id="annualProfit">RM0</div>
+                        <div class="stat-subtitle" id="annualUnits">0 units</div>
+                    </div>
+                    <div class="stat-icon">
+                        <i class="fas fa-trophy"></i>
+                    </div>
                 </div>
-                <div class="metric-icon red">🏆</div>
             </div>
         </div>
 
         <!-- Charts -->
-        <div class="charts-grid">
+        <div class="charts-section">
             <div class="chart-card">
-                <h3>💰 Perbandingan Profit Semua Produk</h3>
-                <canvas id="profitChart" width="400" height="300"></canvas>
-            </div>
-
-            <div class="chart-card">
-                <h3>📊 Pecahan Kos - <span id="selectedProductName">Sos Perapan</span></h3>
-                <canvas id="costChart" width="400" height="300"></canvas>
-            </div>
-        </div>
-
-        <!-- Detailed Breakdown -->
-        <div class="breakdown-section">
-            <h3>🔍 Analisis Terperinci - <span id="detailProductName">Sos Perapan</span></h3>
-            <div class="breakdown-grid">
-                <div>
-                    <h4 style="margin-bottom: 15px; color: #4a5568;">Revenue Breakdown</h4>
-                    <div id="revenueBreakdown">
-                        <!-- Revenue breakdown items will be inserted here -->
-                    </div>
+                <div class="chart-header">
+                    <i class="fas fa-chart-bar"></i>
+                    <h3>Perbandingan Profit Semua Produk</h3>
                 </div>
-                <div>
-                    <h4 style="margin-bottom: 15px; color: #4a5568;">Volume Projections</h4>
-                    <div id="volumeProjections">
-                        <!-- Volume projection items will be inserted here -->
-                    </div>
+                <div class="chart-container">
+                    <canvas id="profitChart"></canvas>
+                </div>
+            </div>
+
+            <div class="chart-card">
+                <div class="chart-header">
+                    <i class="fas fa-chart-pie"></i>
+                    <h3>Pecahan Kos - <span id="selectedProductName">Sos Perapan</span></h3>
+                </div>
+                <div class="chart-container">
+                    <canvas id="costChart"></canvas>
                 </div>
             </div>
         </div>
 
-        <!-- Product Comparison Table -->
+        <!-- Analysis -->
+        <div class="analysis-section">
+            <div class="analysis-card">
+                <div class="analysis-header">
+                    <i class="fas fa-calculator"></i>
+                    <h3>Pecahan Revenue</h3>
+                </div>
+                <div id="revenueBreakdown">
+                    <!-- Revenue breakdown items will be inserted here -->
+                </div>
+            </div>
+
+            <div class="analysis-card">
+                <div class="analysis-header">
+                    <i class="fas fa-chart-area"></i>
+                    <h3>Projeksi Volume</h3>
+                </div>
+                <div id="volumeProjections">
+                    <!-- Volume projection items will be inserted here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Comparison Table -->
         <div class="table-section">
-            <h3>📋 Perbandingan Lengkap Semua Produk</h3>
-            <table class="comparison-table" id="comparisonTable">
-                <thead>
-                    <tr>
-                        <th>Produk</th>
-                        <th>Kos Default</th>
-                        <th>Profit/Unit</th>
-                        <th>Margin %</th>
-                        <th>Daily Profit (50 units)</th>
-                        <th>Monthly Profit</th>
-                    </tr>
-                </thead>
-                <tbody id="comparisonTableBody">
-                </tbody>
-            </table>
+            <div class="table-header">
+                <i class="fas fa-table"></i>
+                <h3>Perbandingan Lengkap Semua Produk</h3>
+            </div>
+            <div style="overflow-x: auto;">
+                <table class="comparison-table" id="comparisonTable">
+                    <thead>
+                        <tr>
+                            <th><i class="fas fa-box"></i> Produk</th>
+                            <th><i class="fas fa-dollar-sign"></i> Kos Default</th>
+                            <th><i class="fas fa-coins"></i> Profit/Unit</th>
+                            <th><i class="fas fa-percentage"></i> Margin %</th>
+                            <th><i class="fas fa-calendar-day"></i> Daily Profit (50 units)</th>
+                            <th><i class="fas fa-calendar"></i> Monthly Profit</th>
+                        </tr>
+                    </thead>
+                    <tbody id="comparisonTableBody">
+                    </tbody>
+                </table>
+            </div>
         </div>
 
         <!-- Recommendations -->
         <div class="recommendations">
-            <h3>💡 Recommendations untuk <span id="recommendationProductName">Sos Perapan</span></h3>
+            <div class="recommendations-header">
+                <i class="fas fa-lightbulb"></i>
+                <h3>Cadangan untuk <span id="recommendationProductName">Sos Perapan</span></h3>
+            </div>
             <div class="recommendations-grid">
-                <div class="recommendation-box">
-                    <h4 style="color: #38a169;">✅ Keunggulan</h4>
+                <div class="recommendation-box advantages">
+                    <h4><i class="fas fa-check-circle"></i> Keunggulan</h4>
                     <ul id="advantages">
                         <!-- Advantages will be inserted here -->
                     </ul>
                 </div>
-                <div class="recommendation-box">
-                    <h4 style="color: #ed8936;">⚠️ Pertimbangan</h4>
+                <div class="recommendation-box considerations">
+                    <h4><i class="fas fa-exclamation-triangle"></i> Pertimbangan</h4>
                     <ul id="considerations">
                         <!-- Considerations will be inserted here -->
                     </ul>
                 </div>
             </div>
-            <div class="target-box" id="targetBox">
-                <!-- Target information will be inserted here -->
+            <div class="target-summary" id="targetBox">
+                <div class="target-icon">
+                    <i class="fas fa-bullseye"></i>
+                </div>
+                <div class="target-text">
+                    <!-- Target information will be inserted here -->
+                </div>
             </div>
         </div>
     </div>
@@ -492,6 +869,7 @@
             const profitCtx = document.getElementById('profitChart').getContext('2d');
             const costCtx = document.getElementById('costChart').getContext('2d');
 
+            // Profit comparison chart
             profitChart = new Chart(profitCtx, {
                 type: 'bar',
                 data: {
@@ -499,31 +877,23 @@
                     datasets: [{
                         label: 'Profit (RM)',
                         data: [],
-                        backgroundColor: '#10B981',
-                        borderColor: '#059669',
-                        borderWidth: 1
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {
-                        y: {
-                            beginAtZero: true
-                        }
-                    }
-                }
-            });
-
-            costChart = new Chart(costCtx, {
-                type: 'pie',
-                data: {
-                    labels: ['Profit', 'Product Cost', 'TikTok Fees', 'Affiliate'],
-                    datasets: [{
-                        data: [0, 0, 0, 0],
-                        backgroundColor: ['#10B981', '#F59E0B', '#EF4444', '#8B5CF6'],
+                        backgroundColor: [
+                            '#10B981',
+                            '#3B82F6', 
+                            '#8B5CF6',
+                            '#F59E0B',
+                            '#EF4444'
+                        ],
+                        borderColor: [
+                            '#059669',
+                            '#2563EB',
+                            '#7C3AED', 
+                            '#D97706',
+                            '#DC2626'
+                        ],
                         borderWidth: 2,
-                        borderColor: '#ffffff'
+                        borderRadius: 8,
+                        borderSkipped: false,
                     }]
                 },
                 options: {
@@ -531,7 +901,91 @@
                     maintainAspectRatio: false,
                     plugins: {
                         legend: {
-                            position: 'bottom'
+                            display: false
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                            titleColor: 'white',
+                            bodyColor: 'white',
+                            borderColor: '#667eea',
+                            borderWidth: 1,
+                            cornerRadius: 8,
+                            callbacks: {
+                                label: function(context) {
+                                    return `Profit: RM${context.parsed.y}`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                color: '#E2E8F0'
+                            },
+                            ticks: {
+                                color: '#64748B',
+                                callback: function(value) {
+                                    return 'RM' + value;
+                                }
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false
+                            },
+                            ticks: {
+                                color: '#64748B',
+                                maxRotation: 45
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Cost breakdown pie chart
+            costChart = new Chart(costCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Profit', 'Kos Produk', 'Fee TikTok', 'Komisyen Affiliate'],
+                    datasets: [{
+                        data: [0, 0, 0, 0],
+                        backgroundColor: ['#10B981', '#F59E0B', '#EF4444', '#8B5CF6'],
+                        borderColor: ['#059669', '#D97706', '#DC2626', '#7C3AED'],
+                        borderWidth: 3,
+                        hoverOffset: 15
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '50%',
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                padding: 20,
+                                usePointStyle: true,
+                                font: {
+                                    size: 12,
+                                    weight: '500'
+                                }
+                            }
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                            titleColor: 'white',
+                            bodyColor: 'white',
+                            borderColor: '#667eea',
+                            borderWidth: 1,
+                            cornerRadius: 8,
+                            callbacks: {
+                                label: function(context) {
+                                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                    const percentage = ((context.parsed / total) * 100).toFixed(1);
+                                    return `${context.label}: RM${context.parsed.toFixed(2)} (${percentage}%)`;
+                                }
+                            }
                         }
                     }
                 }
@@ -578,14 +1032,28 @@
             };
         }
 
+        // Format currency
+        function formatCurrency(amount) {
+            return new Intl.NumberFormat('ms-MY', {
+                style: 'currency',
+                currency: 'MYR',
+                minimumFractionDigits: 2
+            }).format(amount).replace('MYR', 'RM');
+        }
+
+        // Format number
+        function formatNumber(num) {
+            return new Intl.NumberFormat('ms-MY').format(num);
+        }
+
         // Update display
         function updateDisplay() {
             const calculations = calculateProfits();
             const selectedProduct = productSelect.value;
             const product = products[selectedProduct];
 
-            // Update metric cards
-            document.getElementById('profitPerUnit').textContent = `RM${calculations.profitPerUnit.toFixed(2)}`;
+            // Update metric cards with animation
+            animateValue('profitPerUnit', formatCurrency(calculations.profitPerUnit));
             document.getElementById('marginPercent').textContent = `Margin: ${calculations.marginPercent.toFixed(1)}%`;
 
             const dailyProfit = calculations.profit * calculations.dailyVolume;
@@ -596,75 +1064,100 @@
             const monthlyUnits = dailyUnits * 30;
             const annualUnits = monthlyUnits * 12;
 
-            document.getElementById('dailyProfit').textContent = `RM${dailyProfit.toFixed(0)}`;
-            document.getElementById('dailyUnits').textContent = `${dailyUnits} units`;
+            animateValue('dailyProfit', formatCurrency(dailyProfit));
+            document.getElementById('dailyUnits').textContent = `${formatNumber(dailyUnits)} units`;
 
-            document.getElementById('monthlyProfit').textContent = `RM${monthlyProfit.toLocaleString()}`;
-            document.getElementById('monthlyUnits').textContent = `${monthlyUnits.toLocaleString()} units`;
+            animateValue('monthlyProfit', formatCurrency(monthlyProfit));
+            document.getElementById('monthlyUnits').textContent = `${formatNumber(monthlyUnits)} units`;
 
-            document.getElementById('annualProfit').textContent = `RM${annualProfit.toLocaleString()}`;
-            document.getElementById('annualUnits').textContent = `${annualUnits.toLocaleString()} units`;
+            animateValue('annualProfit', formatCurrency(annualProfit));
+            document.getElementById('annualUnits').textContent = `${formatNumber(annualUnits)} units`;
 
             // Update product names in sections
             document.getElementById('selectedProductName').textContent = product.name;
-            document.getElementById('detailProductName').textContent = product.name;
             document.getElementById('recommendationProductName').textContent = product.name;
 
             // Update revenue breakdown
-            const revenueBreakdown = document.getElementById('revenueBreakdown');
-            revenueBreakdown.innerHTML = `
-                <div class="breakdown-item">
-                    <span>Harga Jual (${calculations.units} unit${calculations.units > 1 ? 's' : ''})</span>
-                    <span style="font-weight: 600;">RM${calculations.revenue.toFixed(2)}</span>
-                </div>
-                <div class="breakdown-item">
-                    <span style="color: #ef4444;">TikTok Fees</span>
-                    <span style="color: #ef4444;">-RM${calculations.fees.toFixed(2)}</span>
-                </div>
-                <div class="breakdown-item">
-                    <span style="color: #8b5cf6;">Affiliate Commission (${affiliateRateSelect.value}%)</span>
-                    <span style="color: #8b5cf6;">-RM${calculations.affiliate.toFixed(2)}</span>
-                </div>
-                <div class="breakdown-item">
-                    <span style="color: #f59e0b;">Product Cost</span>
-                    <span style="color: #f59e0b;">-RM${calculations.productCost.toFixed(2)}</span>
-                </div>
-                <div class="breakdown-item">
-                    <span style="color: #10b981;">Net Profit</span>
-                    <span style="color: #10b981;">RM${calculations.profit.toFixed(2)}</span>
-                </div>
-            `;
-
+            updateRevenueBreakdown(calculations);
+            
             // Update volume projections
-            const volumeProjections = document.getElementById('volumeProjections');
-            volumeProjections.innerHTML = `
-                <div class="breakdown-item">
-                    <span>Daily (${calculations.dailyVolume} orders)</span>
-                    <span style="font-weight: 600;">RM${dailyProfit.toFixed(2)}</span>
-                </div>
-                <div class="breakdown-item">
-                    <span>Weekly (x7)</span>
-                    <span style="font-weight: 600;">RM${(dailyProfit * 7).toFixed(2)}</span>
-                </div>
-                <div class="breakdown-item">
-                    <span>Monthly (x30)</span>
-                    <span style="font-weight: 600;">RM${monthlyProfit.toLocaleString()}</span>
-                </div>
-                <div class="breakdown-item">
-                    <span>Annual (x365)</span>
-                    <span style="font-weight: 600;">RM${annualProfit.toLocaleString()}</span>
-                </div>
-                <div class="breakdown-item">
-                    <span style="color: #4299e1;">Annual Units Sold</span>
-                    <span style="color: #4299e1;">${annualUnits.toLocaleString()}</span>
-                </div>
-            `;
+            updateVolumeProjections(calculations, dailyProfit, monthlyProfit, annualProfit, annualUnits);
 
             // Update charts
             updateProfitChart();
             updateCostChart(calculations);
             updateComparisonTable();
-            updateRecommendations(calculations);
+            updateRecommendations(calculations, monthlyProfit);
+        }
+
+        // Animate value change
+        function animateValue(elementId, newValue) {
+            const element = document.getElementById(elementId);
+            element.style.transform = 'scale(1.1)';
+            element.style.color = '#667eea';
+            
+            setTimeout(() => {
+                element.textContent = newValue;
+                element.style.transform = 'scale(1)';
+                element.style.color = '';
+            }, 150);
+        }
+
+        // Update revenue breakdown
+        function updateRevenueBreakdown(calculations) {
+            const revenueBreakdown = document.getElementById('revenueBreakdown');
+            const affiliateRate = affiliateRateSelect.value;
+            
+            revenueBreakdown.innerHTML = `
+                <div class="breakdown-item">
+                    <span class="breakdown-label">Harga Jual (${calculations.units} unit${calculations.units > 1 ? 's' : ''})</span>
+                    <span class="breakdown-value" style="color: var(--success-color);">${formatCurrency(calculations.revenue)}</span>
+                </div>
+                <div class="breakdown-item">
+                    <span class="breakdown-label" style="color: var(--danger-color);">Fee TikTok</span>
+                    <span class="breakdown-value" style="color: var(--danger-color);">-${formatCurrency(calculations.fees)}</span>
+                </div>
+                <div class="breakdown-item">
+                    <span class="breakdown-label" style="color: #8b5cf6;">Komisyen Affiliate (${affiliateRate}%)</span>
+                    <span class="breakdown-value" style="color: #8b5cf6;">-${formatCurrency(calculations.affiliate)}</span>
+                </div>
+                <div class="breakdown-item">
+                    <span class="breakdown-label" style="color: var(--warning-color);">Kos Produk</span>
+                    <span class="breakdown-value" style="color: var(--warning-color);">-${formatCurrency(calculations.productCost)}</span>
+                </div>
+                <div class="breakdown-item">
+                    <span class="breakdown-label" style="color: var(--success-color);">Profit Bersih</span>
+                    <span class="breakdown-value" style="color: var(--success-color);">${formatCurrency(calculations.profit)}</span>
+                </div>
+            `;
+        }
+
+        // Update volume projections
+        function updateVolumeProjections(calculations, dailyProfit, monthlyProfit, annualProfit, annualUnits) {
+            const volumeProjections = document.getElementById('volumeProjections');
+            
+            volumeProjections.innerHTML = `
+                <div class="breakdown-item">
+                    <span class="breakdown-label">Harian (${calculations.dailyVolume} orders)</span>
+                    <span class="breakdown-value">${formatCurrency(dailyProfit)}</span>
+                </div>
+                <div class="breakdown-item">
+                    <span class="breakdown-label">Mingguan (×7)</span>
+                    <span class="breakdown-value">${formatCurrency(dailyProfit * 7)}</span>
+                </div>
+                <div class="breakdown-item">
+                    <span class="breakdown-label">Bulanan (×30)</span>
+                    <span class="breakdown-value">${formatCurrency(monthlyProfit)}</span>
+                </div>
+                <div class="breakdown-item">
+                    <span class="breakdown-label">Tahunan (×365)</span>
+                    <span class="breakdown-value">${formatCurrency(annualProfit)}</span>
+                </div>
+                <div class="breakdown-item">
+                    <span class="breakdown-label" style="color: var(--info-color);">Unit Terjual Setahun</span>
+                    <span class="breakdown-value" style="color: var(--info-color);">${formatNumber(annualUnits)}</span>
+                </div>
+            `;
         }
 
         // Update profit chart
@@ -684,7 +1177,7 @@
 
             profitChart.data.labels = labels;
             profitChart.data.datasets[0].data = data;
-            profitChart.update();
+            profitChart.update('none');
         }
 
         // Update cost chart
@@ -695,7 +1188,7 @@
                 calculations.fees,
                 calculations.affiliate
             ];
-            costChart.update();
+            costChart.update('none');
         }
 
         // Update comparison table
@@ -716,19 +1209,21 @@
 
                 const row = document.createElement('tr');
                 if (selectedProduct === key) {
-                    row.style.backgroundColor = '#ebf8ff';
+                    row.classList.add('highlight-row');
                 }
 
                 row.innerHTML = `
                     <td>
-                        <span class="product-emoji">${product.emoji}</span>
-                        <strong>${product.name}</strong>
+                        <div class="product-cell">
+                            <span class="product-emoji">${product.emoji}</span>
+                            <strong>${product.name}</strong>
+                        </div>
                     </td>
-                    <td>RM${cost.toFixed(2)}</td>
-                    <td style="color: #10b981; font-weight: 600;">RM${profit.toFixed(2)}</td>
+                    <td>${formatCurrency(cost)}</td>
+                    <td style="color: var(--success-color); font-weight: 600;">${formatCurrency(profit)}</td>
                     <td>${margin.toFixed(1)}%</td>
-                    <td style="font-weight: 600;">RM${dailyProfit.toFixed(2)}</td>
-                    <td style="color: #4299e1; font-weight: 600;">RM${monthlyProfit.toLocaleString()}</td>
+                    <td style="font-weight: 600;">${formatCurrency(dailyProfit)}</td>
+                    <td style="color: var(--info-color); font-weight: 600;">${formatCurrency(monthlyProfit)}</td>
                 `;
                 
                 tbody.appendChild(row);
@@ -736,27 +1231,30 @@
         }
 
         // Update recommendations
-        function updateRecommendations(calculations) {
+        function updateRecommendations(calculations, monthlyProfit) {
             const advantages = document.getElementById('advantages');
             const considerations = document.getElementById('considerations');
             const targetBox = document.getElementById('targetBox');
 
             advantages.innerHTML = `
-                <li>• Margin profit tinggi: ${calculations.marginPercent.toFixed(1)}%</li>
-                <li>• Customer bayar shipping sendiri</li>
-                <li>• Sustainable business model</li>
-                <li>• Flexibility dalam bundle pricing</li>
+                <li>Margin profit tinggi: ${calculations.marginPercent.toFixed(1)}%</li>
+                <li>Customer bayar shipping sendiri</li>
+                <li>Model bisnes yang sustainable</li>
+                <li>Fleksibiliti dalam bundle pricing</li>
+                <li>Profit per unit yang menarik</li>
             `;
 
             considerations.innerHTML = `
-                <li>• Customer total payment: RM13-16</li>
-                <li>• Perlu value proposition yang kuat</li>
-                <li>• Kompetisi dengan free shipping</li>
-                <li>• Monitor conversion rate closely</li>
+                <li>Customer total payment: RM13-16</li>
+                <li>Perlu value proposition yang kuat</li>
+                <li>Kompetisi dengan free shipping</li>
+                <li>Monitor conversion rate dengan teliti</li>
+                <li>Perlu strategi marketing yang tepat</li>
             `;
 
-            const monthlyProfit = calculations.profit * calculations.dailyVolume * 30;
-            targetBox.textContent = `🎯 Target: ${calculations.dailyVolume} orders/hari = RM${monthlyProfit.toLocaleString()} profit/bulan`;
+            targetBox.querySelector('.target-text').innerHTML = `
+                <strong>Target:</strong> ${calculations.dailyVolume} orders/hari = ${formatCurrency(monthlyProfit)} profit/bulan
+            `;
         }
 
         // Event listeners
@@ -775,6 +1273,13 @@
         window.addEventListener('load', function() {
             initCharts();
             updateDisplay();
+            
+            // Add smooth loading animation
+            document.body.style.opacity = '0';
+            document.body.style.transition = 'opacity 0.5s ease';
+            setTimeout(() => {
+                document.body.style.opacity = '1';
+            }, 100);
         });
     </script>
 </body>

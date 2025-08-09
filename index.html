@@ -1,436 +1,781 @@
-import React, { useState, useMemo } from 'react';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell } from 'recharts';
-import { Calculator, TrendingUp, Package, DollarSign, Users, Target } from 'lucide-react';
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Analisis Profit - Sos & Tepung</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-const ProductDashboard = () => {
-  const [selectedProduct, setSelectedProduct] = useState('sos-perapan');
-  const [productCost, setProductCost] = useState(3);
-  const [affiliateRate, setAffiliateRate] = useState(15);
-  const [dailyVolume, setDailyVolume] = useState(50);
-  const [bundleType, setBundleType] = useState('single');
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
 
-  const products = {
-    'sos-perapan': { name: 'Sos Perapan', emoji: '🥫', defaultCost: 3.5 },
-    'sos-black-pepper': { name: 'Sos Black Pepper', emoji: '🖤', defaultCost: 3.2 },
-    'sos-cili': { name: 'Sos Cili', emoji: '🌶️', defaultCost: 2.8 },
-    'tepung-tempura': { name: 'Tepung Tempura', emoji: '🍤', defaultCost: 2.5 },
-    'tepung-waffle': { name: 'Tepung Waffle', emoji: '🧇', defaultCost: 3.0 }
-  };
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
 
-  const calculateProfits = useMemo(() => {
-    const basePrice = 10;
-    const tikTokCommission = basePrice * 0.02;
-    const paymentProcessing = basePrice * 0.025;
-    const serviceFee = 0.30;
-    const totalFees = tikTokCommission + paymentProcessing + serviceFee;
-    const affiliateCommission = (affiliateRate / 100) * basePrice;
-    
-    const bundles = {
-      single: { units: 1, revenue: basePrice, fees: totalFees },
-      pack3: { units: 3, revenue: basePrice * 3, fees: 1.65 },
-      pack5: { units: 5, revenue: basePrice * 5, fees: 2.55 }
-    };
-    
-    const bundle = bundles[bundleType];
-    const netRevenue = bundle.revenue - bundle.fees - (affiliateCommission * bundle.units);
-    const totalProductCost = productCost * bundle.units;
-    const profit = netRevenue - totalProductCost;
-    const profitPerUnit = profit / bundle.units;
-    const marginPercent = (profit / bundle.revenue) * 100;
-    
-    return {
-      revenue: bundle.revenue,
-      fees: bundle.fees,
-      affiliate: affiliateCommission * bundle.units,
-      productCost: totalProductCost,
-      profit,
-      profitPerUnit,
-      marginPercent,
-      units: bundle.units
-    };
-  }, [productCost, affiliateRate, bundleType]);
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+        }
 
-  const volumeProjections = useMemo(() => {
-    const daily = calculateProfits.profit * dailyVolume;
-    const monthly = daily * 30;
-    const annual = monthly * 12;
-    const unitsDaily = dailyVolume * calculateProfits.units;
-    const unitsMonthly = unitsDaily * 30;
-    const unitsAnnual = unitsMonthly * 12;
-    
-    return {
-      daily: { profit: daily, units: unitsDaily },
-      monthly: { profit: monthly, units: unitsMonthly },
-      annual: { profit: annual, units: unitsAnnual }
-    };
-  }, [calculateProfits, dailyVolume]);
+        .header h1 {
+            font-size: 2.5em;
+            color: #2d3748;
+            margin-bottom: 10px;
+        }
 
-  const chartData = Object.keys(products).map(key => {
-    const product = products[key];
-    const tempCost = product.defaultCost;
-    const netRevenue = 10 - 0.75 - (affiliateRate / 100 * 10);
-    const profit = netRevenue - tempCost;
-    const margin = (profit / 10) * 100;
-    
-    return {
-      name: product.name,
-      profit: profit.toFixed(2),
-      margin: margin.toFixed(1),
-      cost: tempCost
-    };
-  });
+        .header p {
+            color: #718096;
+            font-size: 1.1em;
+        }
 
-  const pieData = [
-    { name: 'Profit', value: calculateProfits.profit, color: '#10B981' },
-    { name: 'Product Cost', value: calculateProfits.productCost, color: '#F59E0B' },
-    { name: 'TikTok Fees', value: calculateProfits.fees, color: '#EF4444' },
-    { name: 'Affiliate', value: calculateProfits.affiliate, color: '#8B5CF6' }
-  ];
+        .controls {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+        }
 
-  const COLORS = ['#10B981', '#F59E0B', '#EF4444', '#8B5CF6'];
+        .controls h2 {
+            margin-bottom: 20px;
+            color: #2d3748;
+        }
 
-  return (
-    <div className="min-h-screen bg-gray-50 p-6">
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            📊 Dashboard Profit Analysis - Produk Sos & Tepung
-          </h1>
-          <p className="text-gray-600">Harga Jual Fixed RM10 | Customer Bayar Shipping</p>
+        .control-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .control-group label {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #4a5568;
+        }
+
+        .control-group select,
+        .control-group input {
+            padding: 12px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        .control-group select:focus,
+        .control-group input:focus {
+            outline: none;
+            border-color: #4299e1;
+            box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.1);
+        }
+
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .metric-card {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            transition: transform 0.3s;
+        }
+
+        .metric-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .metric-info h3 {
+            font-size: 0.9em;
+            color: #718096;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .metric-info .value {
+            font-size: 2.2em;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .metric-info .subtitle {
+            font-size: 0.9em;
+            color: #a0aec0;
+        }
+
+        .metric-icon {
+            font-size: 3em;
+            opacity: 0.7;
+        }
+
+        .green { color: #48bb78; }
+        .blue { color: #4299e1; }
+        .purple { color: #9f7aea; }
+        .red { color: #f56565; }
+
+        .charts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .chart-card {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+        }
+
+        .chart-card h3 {
+            margin-bottom: 20px;
+            color: #2d3748;
+            font-size: 1.3em;
+        }
+
+        .breakdown-section {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+        }
+
+        .breakdown-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+        }
+
+        .breakdown-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .breakdown-item:last-child {
+            border-bottom: none;
+            font-weight: bold;
+            padding-top: 15px;
+            border-top: 2px solid #e2e8f0;
+        }
+
+        .table-section {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+            overflow-x: auto;
+        }
+
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        .comparison-table th,
+        .comparison-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .comparison-table th {
+            background: #f7fafc;
+            font-weight: 600;
+            color: #4a5568;
+        }
+
+        .comparison-table tr:hover {
+            background: #f7fafc;
+        }
+
+        .recommendations {
+            background: linear-gradient(135deg, #e6fffa 0%, #f0fff4 100%);
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+        }
+
+        .recommendations h3 {
+            margin-bottom: 20px;
+            color: #2d3748;
+        }
+
+        .recommendations-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .recommendation-box {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+
+        .recommendation-box h4 {
+            margin-bottom: 10px;
+            color: #2d3748;
+        }
+
+        .recommendation-box ul {
+            list-style: none;
+            color: #4a5568;
+        }
+
+        .recommendation-box li {
+            padding: 3px 0;
+        }
+
+        .target-box {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            margin-top: 20px;
+            font-weight: bold;
+            color: #2d3748;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2em;
+            }
+            
+            .control-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .metrics-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .charts-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .product-emoji {
+            font-size: 1.5em;
+            margin-right: 8px;
+        }
+
+        .highlight {
+            background: linear-gradient(135deg, #4299e1, #9f7aea);
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>📊 Dashboard Profit Analysis - Produk Sos & Tepung</h1>
+            <p>Harga Jual Fixed RM10 | Customer Bayar Shipping</p>
         </div>
 
-        {/* Controls */}
-        <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-          <h2 className="text-xl font-semibold mb-4">⚙️ Pengaturan Analisis</h2>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Produk</label>
-              <select 
-                value={selectedProduct} 
-                onChange={(e) => {
-                  setSelectedProduct(e.target.value);
-                  setProductCost(products[e.target.value].defaultCost);
-                }}
-                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-              >
-                {Object.entries(products).map(([key, product]) => (
-                  <option key={key} value={key}>
-                    {product.emoji} {product.name}
-                  </option>
-                ))}
-              </select>
-            </div>
+        <!-- Controls -->
+        <div class="controls">
+            <h2>⚙️ Pengaturan Analisis</h2>
+            <div class="control-grid">
+                <div class="control-group">
+                    <label>Produk</label>
+                    <select id="productSelect">
+                        <option value="sos-perapan">🥫 Sos Perapan</option>
+                        <option value="sos-black-pepper">🖤 Sos Black Pepper</option>
+                        <option value="sos-cili">🌶️ Sos Cili</option>
+                        <option value="tepung-tempura">🍤 Tepung Tempura</option>
+                        <option value="tepung-waffle">🧇 Tepung Waffle</option>
+                    </select>
+                </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Kos Produk (RM)</label>
-              <input
-                type="number"
-                step="0.1"
-                value={productCost}
-                onChange={(e) => setProductCost(parseFloat(e.target.value) || 0)}
-                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
+                <div class="control-group">
+                    <label>Kos Produk (RM)</label>
+                    <input type="number" id="productCost" step="0.1" value="3.5">
+                </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Affiliate (%)</label>
-              <select 
-                value={affiliateRate} 
-                onChange={(e) => setAffiliateRate(parseInt(e.target.value))}
-                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-              >
-                <option value={0}>0% - No Affiliate</option>
-                <option value={10}>10% - Standard</option>
-                <option value={15}>15% - Premium</option>
-                <option value={20}>20% - High Rate</option>
-              </select>
-            </div>
+                <div class="control-group">
+                    <label>Affiliate (%)</label>
+                    <select id="affiliateRate">
+                        <option value="0">0% - No Affiliate</option>
+                        <option value="10">10% - Standard</option>
+                        <option value="15" selected>15% - Premium</option>
+                        <option value="20">20% - High Rate</option>
+                    </select>
+                </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Bundle Type</label>
-              <select 
-                value={bundleType} 
-                onChange={(e) => setBundleType(e.target.value)}
-                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-              >
-                <option value="single">Single Item</option>
-                <option value="pack3">3-Pack Bundle</option>
-                <option value="pack5">5-Pack Bundle</option>
-              </select>
-            </div>
+                <div class="control-group">
+                    <label>Bundle Type</label>
+                    <select id="bundleType">
+                        <option value="single" selected>Single Item</option>
+                        <option value="pack3">3-Pack Bundle</option>
+                        <option value="pack5">5-Pack Bundle</option>
+                    </select>
+                </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Volume Harian</label>
-              <input
-                type="number"
-                value={dailyVolume}
-                onChange={(e) => setDailyVolume(parseInt(e.target.value) || 0)}
-                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-              />
+                <div class="control-group">
+                    <label>Volume Harian</label>
+                    <input type="number" id="dailyVolume" value="50">
+                </div>
             </div>
-          </div>
         </div>
 
-        {/* Key Metrics */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
-          <div className="bg-white rounded-lg shadow-md p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Profit Per Unit</p>
-                <p className="text-3xl font-bold text-green-600">
-                  RM{calculateProfits.profitPerUnit.toFixed(2)}
-                </p>
-                <p className="text-sm text-gray-500">
-                  Margin: {calculateProfits.marginPercent.toFixed(1)}%
-                </p>
-              </div>
-              <DollarSign className="h-12 w-12 text-green-600" />
+        <!-- Key Metrics -->
+        <div class="metrics-grid">
+            <div class="metric-card">
+                <div class="metric-info">
+                    <h3>Profit Per Unit</h3>
+                    <div class="value green" id="profitPerUnit">RM0.00</div>
+                    <div class="subtitle" id="marginPercent">Margin: 0%</div>
+                </div>
+                <div class="metric-icon green">💰</div>
             </div>
-          </div>
 
-          <div className="bg-white rounded-lg shadow-md p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Daily Profit</p>
-                <p className="text-3xl font-bold text-blue-600">
-                  RM{volumeProjections.daily.profit.toFixed(0)}
-                </p>
-                <p className="text-sm text-gray-500">
-                  {volumeProjections.daily.units} units
-                </p>
-              </div>
-              <TrendingUp className="h-12 w-12 text-blue-600" />
+            <div class="metric-card">
+                <div class="metric-info">
+                    <h3>Daily Profit</h3>
+                    <div class="value blue" id="dailyProfit">RM0</div>
+                    <div class="subtitle" id="dailyUnits">0 units</div>
+                </div>
+                <div class="metric-icon blue">📈</div>
             </div>
-          </div>
 
-          <div className="bg-white rounded-lg shadow-md p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Monthly Profit</p>
-                <p className="text-3xl font-bold text-purple-600">
-                  RM{volumeProjections.monthly.profit.toLocaleString()}
-                </p>
-                <p className="text-sm text-gray-500">
-                  {volumeProjections.monthly.units.toLocaleString()} units
-                </p>
-              </div>
-              <Target className="h-12 w-12 text-purple-600" />
+            <div class="metric-card">
+                <div class="metric-info">
+                    <h3>Monthly Profit</h3>
+                    <div class="value purple" id="monthlyProfit">RM0</div>
+                    <div class="subtitle" id="monthlyUnits">0 units</div>
+                </div>
+                <div class="metric-icon purple">🎯</div>
             </div>
-          </div>
 
-          <div className="bg-white rounded-lg shadow-md p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Annual Profit</p>
-                <p className="text-3xl font-bold text-red-600">
-                  RM{volumeProjections.annual.profit.toLocaleString()}
-                </p>
-                <p className="text-sm text-gray-500">
-                  {volumeProjections.annual.units.toLocaleString()} units
-                </p>
-              </div>
-              <Calculator className="h-12 w-12 text-red-600" />
+            <div class="metric-card">
+                <div class="metric-info">
+                    <h3>Annual Profit</h3>
+                    <div class="value red" id="annualProfit">RM0</div>
+                    <div class="subtitle" id="annualUnits">0 units</div>
+                </div>
+                <div class="metric-icon red">🏆</div>
             </div>
-          </div>
         </div>
 
-        {/* Charts Row */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-          {/* Profit Comparison Chart */}
-          <div className="bg-white rounded-lg shadow-md p-6">
-            <h3 className="text-lg font-semibold mb-4">💰 Perbandingan Profit Semua Produk</h3>
-            <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={chartData}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="name" angle={-45} textAnchor="end" height={80} />
-                <YAxis />
-                <Tooltip 
-                  formatter={(value, name) => [
-                    name === 'profit' ? `RM${value}` : `${value}%`,
-                    name === 'profit' ? 'Profit' : 'Margin'
-                  ]}
-                />
-                <Legend />
-                <Bar dataKey="profit" fill="#10B981" name="Profit (RM)" />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-
-          {/* Cost Breakdown Pie Chart */}
-          <div className="bg-white rounded-lg shadow-md p-6">
-            <h3 className="text-lg font-semibold mb-4">📊 Pecahan Kos - {products[selectedProduct].name}</h3>
-            <ResponsiveContainer width="100%" height={300}>
-              <PieChart>
-                <Pie
-                  data={pieData}
-                  cx="50%"
-                  cy="50%"
-                  labelLine={false}
-                  label={({ name, value }) => `${name}: RM${value.toFixed(2)}`}
-                  outerRadius={80}
-                  fill="#8884d8"
-                  dataKey="value"
-                >
-                  {pieData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                  ))}
-                </Pie>
-                <Tooltip formatter={(value) => `RM${value.toFixed(2)}`} />
-              </PieChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
-
-        {/* Detailed Breakdown */}
-        <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-          <h3 className="text-lg font-semibold mb-4">🔍 Analisis Terperinci - {products[selectedProduct].name}</h3>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <h4 className="font-medium text-gray-700 mb-3">Revenue Breakdown</h4>
-              <div className="space-y-2">
-                <div className="flex justify-between">
-                  <span>Harga Jual ({calculateProfits.units} unit{calculateProfits.units > 1 ? 's' : ''})</span>
-                  <span className="font-semibold">RM{calculateProfits.revenue.toFixed(2)}</span>
-                </div>
-                <div className="flex justify-between text-red-600">
-                  <span>TikTok Fees</span>
-                  <span>-RM{calculateProfits.fees.toFixed(2)}</span>
-                </div>
-                <div className="flex justify-between text-purple-600">
-                  <span>Affiliate Commission ({affiliateRate}%)</span>
-                  <span>-RM{calculateProfits.affiliate.toFixed(2)}</span>
-                </div>
-                <div className="flex justify-between text-orange-600">
-                  <span>Product Cost</span>
-                  <span>-RM{calculateProfits.productCost.toFixed(2)}</span>
-                </div>
-                <hr />
-                <div className="flex justify-between text-green-600 font-bold">
-                  <span>Net Profit</span>
-                  <span>RM{calculateProfits.profit.toFixed(2)}</span>
-                </div>
-              </div>
+        <!-- Charts -->
+        <div class="charts-grid">
+            <div class="chart-card">
+                <h3>💰 Perbandingan Profit Semua Produk</h3>
+                <canvas id="profitChart" width="400" height="300"></canvas>
             </div>
 
-            <div>
-              <h4 className="font-medium text-gray-700 mb-3">Volume Projections</h4>
-              <div className="space-y-2">
-                <div className="flex justify-between">
-                  <span>Daily ({dailyVolume} orders)</span>
-                  <span className="font-semibold">RM{volumeProjections.daily.profit.toFixed(2)}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>Weekly (x7)</span>
-                  <span className="font-semibold">RM{(volumeProjections.daily.profit * 7).toFixed(2)}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>Monthly (x30)</span>
-                  <span className="font-semibold">RM{volumeProjections.monthly.profit.toLocaleString()}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>Annual (x365)</span>
-                  <span className="font-semibold">RM{volumeProjections.annual.profit.toLocaleString()}</span>
-                </div>
-                <hr />
-                <div className="flex justify-between text-blue-600 font-bold">
-                  <span>Annual Units Sold</span>
-                  <span>{volumeProjections.annual.units.toLocaleString()}</span>
-                </div>
-              </div>
+            <div class="chart-card">
+                <h3>📊 Pecahan Kos - <span id="selectedProductName">Sos Perapan</span></h3>
+                <canvas id="costChart" width="400" height="300"></canvas>
             </div>
-          </div>
         </div>
 
-        {/* Product Comparison Table */}
-        <div className="bg-white rounded-lg shadow-md p-6">
-          <h3 className="text-lg font-semibold mb-4">📋 Perbandingan Lengkap Semua Produk</h3>
-          
-          <div className="overflow-x-auto">
-            <table className="min-w-full table-auto">
-              <thead>
-                <tr className="bg-gray-50">
-                  <th className="px-4 py-3 text-left font-medium text-gray-700">Produk</th>
-                  <th className="px-4 py-3 text-right font-medium text-gray-700">Kos Default</th>
-                  <th className="px-4 py-3 text-right font-medium text-gray-700">Profit/Unit</th>
-                  <th className="px-4 py-3 text-right font-medium text-gray-700">Margin %</th>
-                  <th className="px-4 py-3 text-right font-medium text-gray-700">Daily Profit (50 units)</th>
-                  <th className="px-4 py-3 text-right font-medium text-gray-700">Monthly Profit</th>
-                </tr>
-              </thead>
-              <tbody>
-                {Object.entries(products).map(([key, product]) => {
-                  const cost = product.defaultCost;
-                  const netRevenue = 10 - 0.75 - (affiliateRate / 100 * 10);
-                  const profit = netRevenue - cost;
-                  const margin = (profit / 10) * 100;
-                  const dailyProfit = profit * 50;
-                  const monthlyProfit = dailyProfit * 30;
-                  
-                  return (
-                    <tr key={key} className={selectedProduct === key ? 'bg-blue-50' : 'hover:bg-gray-50'}>
-                      <td className="px-4 py-3">
-                        <div className="flex items-center">
-                          <span className="text-2xl mr-2">{product.emoji}</span>
-                          <span className="font-medium">{product.name}</span>
-                        </div>
-                      </td>
-                      <td className="px-4 py-3 text-right">RM{cost.toFixed(2)}</td>
-                      <td className="px-4 py-3 text-right font-semibold text-green-600">
-                        RM{profit.toFixed(2)}
-                      </td>
-                      <td className="px-4 py-3 text-right">{margin.toFixed(1)}%</td>
-                      <td className="px-4 py-3 text-right font-semibold">
-                        RM{dailyProfit.toFixed(2)}
-                      </td>
-                      <td className="px-4 py-3 text-right font-semibold text-blue-600">
-                        RM{monthlyProfit.toLocaleString()}
-                      </td>
+        <!-- Detailed Breakdown -->
+        <div class="breakdown-section">
+            <h3>🔍 Analisis Terperinci - <span id="detailProductName">Sos Perapan</span></h3>
+            <div class="breakdown-grid">
+                <div>
+                    <h4 style="margin-bottom: 15px; color: #4a5568;">Revenue Breakdown</h4>
+                    <div id="revenueBreakdown">
+                        <!-- Revenue breakdown items will be inserted here -->
+                    </div>
+                </div>
+                <div>
+                    <h4 style="margin-bottom: 15px; color: #4a5568;">Volume Projections</h4>
+                    <div id="volumeProjections">
+                        <!-- Volume projection items will be inserted here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Product Comparison Table -->
+        <div class="table-section">
+            <h3>📋 Perbandingan Lengkap Semua Produk</h3>
+            <table class="comparison-table" id="comparisonTable">
+                <thead>
+                    <tr>
+                        <th>Produk</th>
+                        <th>Kos Default</th>
+                        <th>Profit/Unit</th>
+                        <th>Margin %</th>
+                        <th>Daily Profit (50 units)</th>
+                        <th>Monthly Profit</th>
                     </tr>
-                  );
-                })}
-              </tbody>
+                </thead>
+                <tbody id="comparisonTableBody">
+                </tbody>
             </table>
-          </div>
         </div>
 
-        {/* Recommendations */}
-        <div className="bg-gradient-to-r from-blue-50 to-green-50 rounded-lg p-6">
-          <h3 className="text-lg font-semibold mb-4">💡 Recommendations untuk {products[selectedProduct].name}</h3>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <h4 className="font-medium text-green-700 mb-2">✅ Keunggulan</h4>
-              <ul className="text-sm space-y-1 text-gray-700">
-                <li>• Margin profit tinggi: {calculateProfits.marginPercent.toFixed(1)}%</li>
+        <!-- Recommendations -->
+        <div class="recommendations">
+            <h3>💡 Recommendations untuk <span id="recommendationProductName">Sos Perapan</span></h3>
+            <div class="recommendations-grid">
+                <div class="recommendation-box">
+                    <h4 style="color: #38a169;">✅ Keunggulan</h4>
+                    <ul id="advantages">
+                        <!-- Advantages will be inserted here -->
+                    </ul>
+                </div>
+                <div class="recommendation-box">
+                    <h4 style="color: #ed8936;">⚠️ Pertimbangan</h4>
+                    <ul id="considerations">
+                        <!-- Considerations will be inserted here -->
+                    </ul>
+                </div>
+            </div>
+            <div class="target-box" id="targetBox">
+                <!-- Target information will be inserted here -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Product data
+        const products = {
+            'sos-perapan': { name: 'Sos Perapan', emoji: '🥫', defaultCost: 3.5 },
+            'sos-black-pepper': { name: 'Sos Black Pepper', emoji: '🖤', defaultCost: 3.2 },
+            'sos-cili': { name: 'Sos Cili', emoji: '🌶️', defaultCost: 2.8 },
+            'tepung-tempura': { name: 'Tepung Tempura', emoji: '🍤', defaultCost: 2.5 },
+            'tepung-waffle': { name: 'Tepung Waffle', emoji: '🧇', defaultCost: 3.0 }
+        };
+
+        // Chart instances
+        let profitChart, costChart;
+
+        // Get DOM elements
+        const productSelect = document.getElementById('productSelect');
+        const productCostInput = document.getElementById('productCost');
+        const affiliateRateSelect = document.getElementById('affiliateRate');
+        const bundleTypeSelect = document.getElementById('bundleType');
+        const dailyVolumeInput = document.getElementById('dailyVolume');
+
+        // Initialize charts
+        function initCharts() {
+            const profitCtx = document.getElementById('profitChart').getContext('2d');
+            const costCtx = document.getElementById('costChart').getContext('2d');
+
+            profitChart = new Chart(profitCtx, {
+                type: 'bar',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: 'Profit (RM)',
+                        data: [],
+                        backgroundColor: '#10B981',
+                        borderColor: '#059669',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+
+            costChart = new Chart(costCtx, {
+                type: 'pie',
+                data: {
+                    labels: ['Profit', 'Product Cost', 'TikTok Fees', 'Affiliate'],
+                    datasets: [{
+                        data: [0, 0, 0, 0],
+                        backgroundColor: ['#10B981', '#F59E0B', '#EF4444', '#8B5CF6'],
+                        borderWidth: 2,
+                        borderColor: '#ffffff'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        }
+                    }
+                }
+            });
+        }
+
+        // Calculate profits
+        function calculateProfits() {
+            const basePrice = 10;
+            const productCost = parseFloat(productCostInput.value) || 0;
+            const affiliateRate = parseInt(affiliateRateSelect.value) || 0;
+            const bundleType = bundleTypeSelect.value;
+            const dailyVolume = parseInt(dailyVolumeInput.value) || 0;
+
+            const tikTokCommission = basePrice * 0.02;
+            const paymentProcessing = basePrice * 0.025;
+            const serviceFee = 0.30;
+            const totalFees = tikTokCommission + paymentProcessing + serviceFee;
+            const affiliateCommission = (affiliateRate / 100) * basePrice;
+
+            const bundles = {
+                single: { units: 1, revenue: basePrice, fees: totalFees },
+                pack3: { units: 3, revenue: basePrice * 3, fees: 1.65 },
+                pack5: { units: 5, revenue: basePrice * 5, fees: 2.55 }
+            };
+
+            const bundle = bundles[bundleType];
+            const netRevenue = bundle.revenue - bundle.fees - (affiliateCommission * bundle.units);
+            const totalProductCost = productCost * bundle.units;
+            const profit = netRevenue - totalProductCost;
+            const profitPerUnit = profit / bundle.units;
+            const marginPercent = (profit / bundle.revenue) * 100;
+
+            return {
+                revenue: bundle.revenue,
+                fees: bundle.fees,
+                affiliate: affiliateCommission * bundle.units,
+                productCost: totalProductCost,
+                profit,
+                profitPerUnit,
+                marginPercent,
+                units: bundle.units,
+                dailyVolume
+            };
+        }
+
+        // Update display
+        function updateDisplay() {
+            const calculations = calculateProfits();
+            const selectedProduct = productSelect.value;
+            const product = products[selectedProduct];
+
+            // Update metric cards
+            document.getElementById('profitPerUnit').textContent = `RM${calculations.profitPerUnit.toFixed(2)}`;
+            document.getElementById('marginPercent').textContent = `Margin: ${calculations.marginPercent.toFixed(1)}%`;
+
+            const dailyProfit = calculations.profit * calculations.dailyVolume;
+            const monthlyProfit = dailyProfit * 30;
+            const annualProfit = monthlyProfit * 12;
+
+            const dailyUnits = calculations.dailyVolume * calculations.units;
+            const monthlyUnits = dailyUnits * 30;
+            const annualUnits = monthlyUnits * 12;
+
+            document.getElementById('dailyProfit').textContent = `RM${dailyProfit.toFixed(0)}`;
+            document.getElementById('dailyUnits').textContent = `${dailyUnits} units`;
+
+            document.getElementById('monthlyProfit').textContent = `RM${monthlyProfit.toLocaleString()}`;
+            document.getElementById('monthlyUnits').textContent = `${monthlyUnits.toLocaleString()} units`;
+
+            document.getElementById('annualProfit').textContent = `RM${annualProfit.toLocaleString()}`;
+            document.getElementById('annualUnits').textContent = `${annualUnits.toLocaleString()} units`;
+
+            // Update product names in sections
+            document.getElementById('selectedProductName').textContent = product.name;
+            document.getElementById('detailProductName').textContent = product.name;
+            document.getElementById('recommendationProductName').textContent = product.name;
+
+            // Update revenue breakdown
+            const revenueBreakdown = document.getElementById('revenueBreakdown');
+            revenueBreakdown.innerHTML = `
+                <div class="breakdown-item">
+                    <span>Harga Jual (${calculations.units} unit${calculations.units > 1 ? 's' : ''})</span>
+                    <span style="font-weight: 600;">RM${calculations.revenue.toFixed(2)}</span>
+                </div>
+                <div class="breakdown-item">
+                    <span style="color: #ef4444;">TikTok Fees</span>
+                    <span style="color: #ef4444;">-RM${calculations.fees.toFixed(2)}</span>
+                </div>
+                <div class="breakdown-item">
+                    <span style="color: #8b5cf6;">Affiliate Commission (${affiliateRateSelect.value}%)</span>
+                    <span style="color: #8b5cf6;">-RM${calculations.affiliate.toFixed(2)}</span>
+                </div>
+                <div class="breakdown-item">
+                    <span style="color: #f59e0b;">Product Cost</span>
+                    <span style="color: #f59e0b;">-RM${calculations.productCost.toFixed(2)}</span>
+                </div>
+                <div class="breakdown-item">
+                    <span style="color: #10b981;">Net Profit</span>
+                    <span style="color: #10b981;">RM${calculations.profit.toFixed(2)}</span>
+                </div>
+            `;
+
+            // Update volume projections
+            const volumeProjections = document.getElementById('volumeProjections');
+            volumeProjections.innerHTML = `
+                <div class="breakdown-item">
+                    <span>Daily (${calculations.dailyVolume} orders)</span>
+                    <span style="font-weight: 600;">RM${dailyProfit.toFixed(2)}</span>
+                </div>
+                <div class="breakdown-item">
+                    <span>Weekly (x7)</span>
+                    <span style="font-weight: 600;">RM${(dailyProfit * 7).toFixed(2)}</span>
+                </div>
+                <div class="breakdown-item">
+                    <span>Monthly (x30)</span>
+                    <span style="font-weight: 600;">RM${monthlyProfit.toLocaleString()}</span>
+                </div>
+                <div class="breakdown-item">
+                    <span>Annual (x365)</span>
+                    <span style="font-weight: 600;">RM${annualProfit.toLocaleString()}</span>
+                </div>
+                <div class="breakdown-item">
+                    <span style="color: #4299e1;">Annual Units Sold</span>
+                    <span style="color: #4299e1;">${annualUnits.toLocaleString()}</span>
+                </div>
+            `;
+
+            // Update charts
+            updateProfitChart();
+            updateCostChart(calculations);
+            updateComparisonTable();
+            updateRecommendations(calculations);
+        }
+
+        // Update profit chart
+        function updateProfitChart() {
+            const affiliateRate = parseInt(affiliateRateSelect.value) || 0;
+            const labels = [];
+            const data = [];
+
+            Object.entries(products).forEach(([key, product]) => {
+                const cost = product.defaultCost;
+                const netRevenue = 10 - 0.75 - (affiliateRate / 100 * 10);
+                const profit = netRevenue - cost;
+                
+                labels.push(product.name);
+                data.push(profit.toFixed(2));
+            });
+
+            profitChart.data.labels = labels;
+            profitChart.data.datasets[0].data = data;
+            profitChart.update();
+        }
+
+        // Update cost chart
+        function updateCostChart(calculations) {
+            costChart.data.datasets[0].data = [
+                calculations.profit,
+                calculations.productCost,
+                calculations.fees,
+                calculations.affiliate
+            ];
+            costChart.update();
+        }
+
+        // Update comparison table
+        function updateComparisonTable() {
+            const tbody = document.getElementById('comparisonTableBody');
+            const affiliateRate = parseInt(affiliateRateSelect.value) || 0;
+            const selectedProduct = productSelect.value;
+            
+            tbody.innerHTML = '';
+
+            Object.entries(products).forEach(([key, product]) => {
+                const cost = product.defaultCost;
+                const netRevenue = 10 - 0.75 - (affiliateRate / 100 * 10);
+                const profit = netRevenue - cost;
+                const margin = (profit / 10) * 100;
+                const dailyProfit = profit * 50;
+                const monthlyProfit = dailyProfit * 30;
+
+                const row = document.createElement('tr');
+                if (selectedProduct === key) {
+                    row.style.backgroundColor = '#ebf8ff';
+                }
+
+                row.innerHTML = `
+                    <td>
+                        <span class="product-emoji">${product.emoji}</span>
+                        <strong>${product.name}</strong>
+                    </td>
+                    <td>RM${cost.toFixed(2)}</td>
+                    <td style="color: #10b981; font-weight: 600;">RM${profit.toFixed(2)}</td>
+                    <td>${margin.toFixed(1)}%</td>
+                    <td style="font-weight: 600;">RM${dailyProfit.toFixed(2)}</td>
+                    <td style="color: #4299e1; font-weight: 600;">RM${monthlyProfit.toLocaleString()}</td>
+                `;
+                
+                tbody.appendChild(row);
+            });
+        }
+
+        // Update recommendations
+        function updateRecommendations(calculations) {
+            const advantages = document.getElementById('advantages');
+            const considerations = document.getElementById('considerations');
+            const targetBox = document.getElementById('targetBox');
+
+            advantages.innerHTML = `
+                <li>• Margin profit tinggi: ${calculations.marginPercent.toFixed(1)}%</li>
                 <li>• Customer bayar shipping sendiri</li>
                 <li>• Sustainable business model</li>
                 <li>• Flexibility dalam bundle pricing</li>
-              </ul>
-            </div>
-            
-            <div>
-              <h4 className="font-medium text-orange-700 mb-2">⚠️ Pertimbangan</h4>
-              <ul className="text-sm space-y-1 text-gray-700">
+            `;
+
+            considerations.innerHTML = `
                 <li>• Customer total payment: RM13-16</li>
                 <li>• Perlu value proposition yang kuat</li>
                 <li>• Kompetisi dengan free shipping</li>
                 <li>• Monitor conversion rate closely</li>
-              </ul>
-            </div>
-          </div>
-          
-          <div className="mt-4 p-4 bg-white rounded-lg">
-            <p className="text-center font-semibold text-gray-800">
-              🎯 Target: {dailyVolume} orders/hari = RM{volumeProjections.monthly.profit.toLocaleString()} profit/bulan
-            </p>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-};
+            `;
 
-export default ProductDashboard;
+            const monthlyProfit = calculations.profit * calculations.dailyVolume * 30;
+            targetBox.textContent = `🎯 Target: ${calculations.dailyVolume} orders/hari = RM${monthlyProfit.toLocaleString()} profit/bulan`;
+        }
+
+        // Event listeners
+        productSelect.addEventListener('change', function() {
+            const product = products[this.value];
+            productCostInput.value = product.defaultCost;
+            updateDisplay();
+        });
+
+        productCostInput.addEventListener('input', updateDisplay);
+        affiliateRateSelect.addEventListener('change', updateDisplay);
+        bundleTypeSelect.addEventListener('change', updateDisplay);
+        dailyVolumeInput.addEventListener('input', updateDisplay);
+
+        // Initialize
+        window.addEventListener('load', function() {
+            initCharts();
+            updateDisplay();
+        });
+    </script>
+</body>
+</html>
